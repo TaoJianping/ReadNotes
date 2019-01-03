@@ -74,3 +74,12 @@ c._haha()		# 你会发现调用的仍然父类中的__test,他并没有被重写
 
 ```
 
+
+
+参考资料
+
+http://www.cnblogs.com/coder2012/p/4423356.html
+
+https://segmentfault.com/a/1190000002611411
+
+https://blog.csdn.net/wukai_std/article/details/54972522
