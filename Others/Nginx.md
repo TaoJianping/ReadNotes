@@ -18,3 +18,31 @@
 
 
 
+#### 如何完成高并发的
+
+master-worker模式，有几个worker就开几个进程，每个进程维护一个线程，避免线程的上下文切换，并且每个线程采用epoll模式。
+
+
+
+#### 语法
+
+###### 控制语句
+
+```shell
+nginx -s [ stop | quit | reopen | reload ]
+```
+
+- nginx -s stop： 强制停止NGINX，不管工作进程当前是否正在处理用户请求，都会立即退出。
+
+- nginx -s quit：“优雅地”退出NGINX，执行这个命令后，工作进程会将当前正在处理的请求处理完毕后，再退出。
+- nginx -s reload：重载配置信息。当NGINX的配置文件改变之后，同过执行这个命令，使更改的配置信息生效，而无需重新启动nginx.
+- nginx -s reopen：重新打开日志文件。
+
+
+
+
+
+
+
+
+
