@@ -1,3 +1,50 @@
+## 面向连接的运输：TCP
+
+前面介绍了那么多的可靠协议需要的东西，就是为了引出最重要的TCP协议。
+
+ TODO:p153
+
+> 最大报文段长度( Maximum Segment Size, MSS )
+>
+> 最大传输单元( Maximum Transmission Unit, MTU )
+
+
+
+#### 特点
+
+- 面向连接的(connection-oriented)：面向连接的意思是，在用TCP协议传输数据前，必须有一个握手的阶段，即他们会发送一些预备报文段，来建立确保数据传输的参数。作为连接的双方，都会初始化很多TCP的状态变量。注意，这个是一种抽象的概念，实际上，底层的链路等硬件根本不会看到这些‘连接’，他们看到的只是数据报。
+- 双全工服务(full-duplex service)：建立连接的双方可以互相传输数据，并且是点对点的，并不会一对多的放松。
+
+![image](https://ws3.sinaimg.cn/large/005wgNfbgy1g01vz07ln8j30gb079mxi.jpg)
+
+上图是一个最简单的TCP示意图，**send buffer**和**receive buffer**就是在握手阶段建立的状态。
+
+
+
+#### TCP报文段结构
+
+![image](https://wx3.sinaimg.cn/large/005wgNfbgy1g01w57u82uj30d00bx3yy.jpg)
+
+- 源端口号(18bit)
+- 目标端口号(18bit)
+- 序号字段( Sequence number field, 32bit )
+- 确认号字段( Acknowledgment number, 32bit )
+- 接收窗口字段( receive window field, 16bit )
+- 首部长度字段( header length field, 4bit )
+- 可选与变长的选项字段( options field, 32bit)
+- 标志字段( flag field, 6bit )
+
+
+
+##### 序号和确认号的特点：
+
+- 他的数字不是报文段的序号，而是基于字节流的，比如发送一个1000字节的报文，seq=0,ack=1000
+- 累计确认：如果接收方收到0-535的报文段和900-1000的报文段，中间536-899的报文段丢失，那么他之后的ack永远会设置成536，因此TCP只确认该流中至第一个丢失字节为止的字节
+- 针对上面第二个中提到的900-1000的报文段，实际上TCP RFC并没有强行规定你应该如何处理，你要丢掉或者缓存都可以，当然一般都是缓存下来了。
+- 初始序号一般都是随机设置的
+
+
+
 #### 往返时间的估计和超时
 
 因为TCP协议是用超时/重传协议来处理数据报文丢失的问题的。所以这个超时时间的设定就是重中之重。那我们应该如何设置这个超时时间呢？或者说我们应该通过哪些数据来组成这个超时时间呢？
