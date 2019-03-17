@@ -1,3 +1,37 @@
+## 条件转移指令
+
+#### cmp
+
+它需要两个操作数，目的操作数可以是 8 位或者 16 位通用寄存器，也可以是 8 位或者 16 位内存单元；源操作数可以是与目的操作数宽度一致的通用寄存器、内存单元或者立即数，但两个操作数同时为内存单元的情况除外。
+
+```assembly
+cmp al,0x08
+cmp dx,bx
+cmp [label_a],cx
+```
+
+cmp 指令在功能上和 sub 指令相同，唯一不同之处在于，cmp 指令仅仅根据计算的结果设置相应的标志位，而不保留计算结果，因此也就不会改变两个操作数的原有内容。cmp 指令将会影响到CF、OF、SF、ZF、AF 和 PF 标志位。
+
+![image](https://wx1.sinaimg.cn/large/005wgNfbgy1g169ah17l0j30nh0ku44t.jpg)
+
+![image](https://ws4.sinaimg.cn/large/005wgNfbgy1g169b39hqwj30nf0cvwhg.jpg)
+
+
+
+#### jcxz（jump if CX is zero）
+
+意思是当 CX 寄存器的内容为零时则转移。执行这条指令时，处理器先测试寄存器 CX 是否为零。
+
+```assembly
+jcxz show
+```
+
+这里，“show”是程序中的一个标号。执行这条指令时，如果 CX 寄存器的内容为零，则转移；否则不转移，继续往下执行。
+
+
+
+## 运算指令
+
 #### div
 
 1. 16 位的二进制数除以 8 位的二进制数。
@@ -25,6 +59,10 @@
    ```
 
 
+
+
+
+## 操作指令
 
 #### movsb和movsw 
 
