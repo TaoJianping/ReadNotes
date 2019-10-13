@@ -18,11 +18,51 @@ Parsing is the task of determing the syntax, or structure, of a program. It is a
 
 It is the task of the parser to determine the syntactic structure of a program from the tokens produced by the scanner and, either explicitly or implicity, to construct a parse tree or syntax tree that represents this structure.
 
+本质上就是说：给定文法G和句子s，是否存在句子s的推导？
+
 
 
 ## 3.2 CONTEXT-FREE GRAMMARS
 
 A context-free prammar is a specification for the syntatic structure of a programming language.
+
+
+
+## 3.3 Parse Trees and Abstract Syntax Trees
+
+#### 3.31 Parse Tree
+
+A **parse tree** corresponding to a derivation is a labeled tree in which interior nodes are labeled by nonterminals, the leaf nodes are labeled by terminals, and the children of each internal node represent the replacement of the associated nonterminal in one step of the derivation.
+
+parse tree 能够反映出语法的每一步的推导过程。但是和推导所用的顺序无关（最左，最右，其他）。 但是有一点很重要，这个树推出来后，他的推导顺序却会影响他的含义。因为他并不涉及precedence。
+
+
+
+## 3.4 Ambiguity 
+
+A grammar that generates a string with two distinct parse trees is called an **ambiguous grammar**.
+
+#### Cause a serious problem
+
+- it does not specify precisely the syntactic structure of program.
+- 程序的结果也可能不是唯一的。
+
+
+
+#### Two basic methods are used to deal with:
+
+- disambiguating rule: state a rule that specifies in each ambiguous case which of the parse trees(or syntax tree) is the correct one.
+- change the grammar into a form that forces the construction of the correct parse tree, thus remoing the ambiguity.(文法重写)
+
+
+
+> left associative: 左结合，加法这些算数的时候要做到这个。
+
+
+
+#### The Dangling Else Problem
+
+TODO
 
 
 
@@ -90,4 +130,17 @@ TODO
 > aSb -> aaSbb
 > S -> ab
 > 这就是上下文相关文法，因为它的第一个产生式左边有不止一个符号，所以你在匹配这个产生式中的S的时候必需确保这个S有正确的“上下文”，也就是左边的a和右边的b，所以叫上下文相关文法。
+
+
+
+#### Chomsky hierarchy
+
+| Grammar | Languages                                                    | Automaton                                                    | Production rules (constraints)*                              | Examples[[3\]](https://en.wikipedia.org/wiki/Chomsky_hierarchy#cite_note-3) |
+| ------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Type-0  | [Recursively enumerable](https://en.wikipedia.org/wiki/Recursively_enumerable_language) | [Turing machine](https://en.wikipedia.org/wiki/Turing_machine) | {\displaystyle \alpha A\beta \rightarrow \gamma }![{\displaystyle \alpha A\beta \rightarrow \gamma }](https://wikimedia.org/api/rest_v1/media/math/render/svg/f9039cfe0e71e691bcd1720a9bd8f599fa914b0d) | {\displaystyle L=\{w\|w}![{\displaystyle L=\{w\|w}](https://wikimedia.org/api/rest_v1/media/math/render/svg/46f75a36ee91fb70c39b78145c087df4abdb1035) describes a terminating Turing machine{\displaystyle \}}![\}](https://wikimedia.org/api/rest_v1/media/math/render/svg/2cf208e5d370391e66767f13641bd5ee6ad93825) |
+| Type-1  | [Context-sensitive](https://en.wikipedia.org/wiki/Context-sensitive_grammar) | [Linear-bounded non-deterministic Turing machine](https://en.wikipedia.org/wiki/Linear_bounded_automaton) | {\displaystyle \alpha A\beta \rightarrow \alpha \gamma \beta }![\alpha A \beta \rightarrow \alpha \gamma \beta](https://wikimedia.org/api/rest_v1/media/math/render/svg/1173552bcbf68bb06baf9b0a2f543dbc845caefd) | {\displaystyle L=\{a^{n}b^{n}c^{n}\|n>0\}}![{\displaystyle L=\{a^{n}b^{n}c^{n}\|n>0\}}](https://wikimedia.org/api/rest_v1/media/math/render/svg/2bb63b71ffcba840f36e802aafe4c9951cf9ec38) |
+| Type-2  | [Context-free](https://en.wikipedia.org/wiki/Context-free_grammar) | Non-deterministic [pushdown automaton](https://en.wikipedia.org/wiki/Pushdown_automaton) | {\displaystyle A\rightarrow \alpha }![{\displaystyle A\rightarrow \alpha }](https://wikimedia.org/api/rest_v1/media/math/render/svg/13dc432701b1477bc9ba32b0d71c58ecf2d44d9e) | {\displaystyle L=\{a^{n}b^{n}\|n>0\}}![{\displaystyle L=\{a^{n}b^{n}\|n>0\}}](https://wikimedia.org/api/rest_v1/media/math/render/svg/dfafe0fa14e5249f492f5cbde42062ba4904d56f) |
+| Type-3  | [Regular](https://en.wikipedia.org/wiki/Regular_grammar)     | [Finite state automaton](https://en.wikipedia.org/wiki/Finite_state_automaton) | {\displaystyle A\rightarrow {\text{a}}}![{\displaystyle A\rightarrow {\text{a}}}](https://wikimedia.org/api/rest_v1/media/math/render/svg/c5a21ff7c854fa27daf7ab3882590f938e5720e9) and {\displaystyle A\rightarrow {\text{a}}B}![{\displaystyle A\rightarrow {\text{a}}B}](https://wikimedia.org/api/rest_v1/media/math/render/svg/8a487d4dba9e9959ea3a34e06b5e5677c8eff4d4) | {\displaystyle L=\{a^{n}\|n\geq 0\}}![{\displaystyle L=\{a^{n}\|n\geq 0\}}](https://wikimedia.org/api/rest_v1/media/math/render/svg/2d8085f37ec7d2aa499b0d27008c940279088d09) |
+
+[参考链接](<https://en.wikipedia.org/wiki/Chomsky_hierarchy#Type-0_grammars>)
 
