@@ -80,6 +80,8 @@ while there are changes to any follow sets do
 
 #### Rule
 
+Repeat the following two steps for each nonterminal A and production choice $A \rightarrow \alpha$
+
 1. For each token a in $First(\alpha)$, add $A \rightarrow \alpha$ to the entry M[A, a]
 2. If $\varepsilon$ is in $First(\alpha)$ , for each element a of Follow(A) (a token or \$), add $A \rightarrow \alpha$ to M[A, a].
 
