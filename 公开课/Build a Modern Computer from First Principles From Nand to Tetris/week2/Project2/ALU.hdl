@@ -26,6 +26,10 @@
 // if (out == 0) set zr = 1
 // if (out < 0) set ng = 1
 
+// 这里的点其实就是注意如何在hdl实现类似于条件判断的东西，实现的方法就是Mux16
+// 另外两个很重要的点是如何实现：
+//      1. 相等：就是16个bit每一位进行OR运算，把结果和下一位进行OR运算
+//      2. 小于：15位比较就可以了
 CHIP ALU {
     IN  
         x[16], y[16],  // 16-bit inputs        
@@ -43,4 +47,28 @@ CHIP ALU {
 
     PARTS:
    // Put you code here:
+   Mux16(a=x, b=false, sel=zx, out=zeroX);
+
+   Not16(in=zeroX, out=notX);
+   Mux16(a=zeroX, b=notX, sel=nx, out=negateX);
+
+
+   Mux16(a=y, b=false, sel=zy, out=zeroY);
+
+   Not16(in=zeroY, out=notY);
+   Mux16(a=zeroY, b=notY, sel=ny, out=negateY);
+
+   Add16(a=negateX, b=negateY, out=xplusy);
+   And16(a=negateX, b=negateY, out=xandy);
+   Mux16(a=xandy, b=xplusy, sel=f, out=fout);
+
+   
+   Not16(in=fout, out=negatefout);
+   Mux16(a=fout, b=negatefout, sel=no, out=out, out=out1);
+
+   IsNeg(in =out1, out = ng);
+    Equal16Way(in=out1, out=zr1);
+    Not(in=zr1, out=zr);
+   
+
 }
