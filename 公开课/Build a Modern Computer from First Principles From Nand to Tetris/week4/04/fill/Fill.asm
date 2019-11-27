@@ -12,3 +12,113 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+
+
+// initial parameter
+@8192
+D=A
+@R0
+M=D  
+
+// set start address
+@SCREEN
+D=A
+@StartAddress
+M=D
+
+(ListenKeyOn)
+    // set start address
+    @SCREEN
+    D=A
+    @StartAddress
+    M=D
+    @KBD
+    D=M
+    @ListenKeyOn
+    D;JEQ
+    @FillOutScreen
+    0;JMP
+
+// if KBD != 0 loop
+(ListenKeyOFF)
+    // set start address
+    @SCREEN
+    D=A
+    @StartAddress
+    M=D
+    @KBD
+    D=M
+    @ListenKeyOFF
+    D;JNE
+    @ClearScreen
+    0;JMP
+
+
+
+
+(FillOutScreen)
+    // set i
+    @i
+    M=0
+
+    // set n = 8192
+    @R0
+    D=M
+    @n
+    M=D
+
+(StartFill)
+    // if n < 0 goto @END
+    @n
+    M=M-1
+    D=M
+    @ListenKeyOFF
+    D;JLT
+    // else
+
+    @StartAddress
+    A=M
+    M=-1
+
+    @StartAddress
+    M=M+1
+
+    @StartFill
+    0;JMP
+
+
+(ClearScreen)
+    // set i
+    @i
+    M=0
+
+    // set n = 8192
+    @R0
+    D=M
+    @n
+    M=D
+
+
+(StartClear)
+    // if n < 0 goto @END
+    @n
+    M=M-1
+    D=M
+    @ListenKeyOn
+    D;JLT
+    // else
+
+    @StartAddress
+    A=M
+    M=0
+
+    @StartAddress
+    M=M+1
+
+    @StartClear
+    0;JMP
+
+
+(END)
+    @END 
+    0;JMP
