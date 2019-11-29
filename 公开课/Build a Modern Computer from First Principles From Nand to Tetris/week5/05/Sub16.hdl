@@ -1,0 +1,11 @@
+
+CHIP Sub16 {
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+    Not16(in=b, out=NotB);
+    Add16(a=NotB, b[0]=true, out=NegB);
+    Add16(a=a, b=NegB, out=out);
+}
