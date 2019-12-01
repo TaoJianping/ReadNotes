@@ -40,9 +40,33 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
-    PC(in=, load=, inc=, reset=, out=);
-    ALU(x=, y=, zx=, nx=, zy=, ny=, f=, no=, out=, zr=, ng=);
-    ARegister(in=, load=, out=);
-    DRegister(in=, load=, out=);
+    // 111 0001100 000 001
+
+
+    Mux16(a=instruction, b=AluOut, sel=instruction[15], out=regAIn);
+    Not(in=instruction[15], out=isAInstruction);
+    Not(in=isAInstruction, out=isDInstruction);
+    And(a=instruction[15], b=instruction[5], out=isDInstrNeedLoadAreg);
+    Or(a=isAInstruction, b=isDInstrNeedLoadAreg, out=ARegisterLoad);
+    ARegister(in=regAIn, load=ARegisterLoad, out[0..14]=RegAOut, out[0..14]=addressM);
+    And(a=isDInstruction, b=instruction[4], out=NeedLoadDreg);
+    DRegister(in=AluOut, load=NeedLoadDreg, out=RegDOut);
+    // Memory(in=AluOut, load=instruction[3], address= RegAOut, out=MemoryOut);
+    And(a=instruction[15], b=instruction[3], out=writeM);
+    Mux16(a[0..14]=RegAOut, a[15]=false, b=inM, sel=instruction[12], out=AluY);
     
+    And(a=instruction[2], b=isNeg, out=tmp1);
+    And(a=instruction[1], b=isZero, out=tmp2);
+    Not(in=isNeg, out=isNotNeg);
+    Not(in=isZero, out=isNotZero);
+    And(a=isNotNeg, b=isNotZero, out=isPositive);
+    And(a=instruction[0], b=isPositive, out=tmp3);
+    Or(a=tmp1, b=tmp2, out=tmp4);
+    Or(a=tmp4, b=tmp3, out=tmp5);
+    
+    And(a=tmp5, b=instruction[15], out=isLoad);
+    Not(in=isLoad, out=isInc);
+
+    PC(in[0..14]=RegAOut, in[15]=false, load=isLoad, inc=isInc, reset=reset, out[0..14]=pc);
+    ALU(x=RegDOut, y=AluY, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=AluOut, out=outM, zr=isZero, ng=isNeg);
 }
