@@ -276,5 +276,59 @@ The sequence of transitions that accepts a paticular string is not determined at
 
 ## 2.4 FROM REGULAR EXPRESSIONS TO DFAs
 
-TODO
+### 2.4.1 From a Regular Expression to an NFA
 
+The construction we will describe is known as **Thompson's construction**.
+
+
+
+#### Basic Regular Expressions
+
+A basic regular Expressions is of the form a, $\epsilon$ or $\phi$ 
+
+- a: a represents a match of a single character from the alphabet
+- $\epsilon$: represents a match of the empty string
+- $\phi$: represents a match of no strings at all
+
+![image](https://tva4.sinaimg.cn/large/005wgNfbly1g9v4sqtnu8j30c40343yg.jpg)
+
+![image](https://tvax4.sinaimg.cn/large/005wgNfbly1g9v4t2xu99j30cv03wt8p.jpg)
+
+
+
+#### Concatenation
+
+![image](https://tva4.sinaimg.cn/large/005wgNfbly1g9v505f0egj30au05e3yo.jpg)
+
+
+
+#### Choice Among Alternatives
+
+![image](https://tvax4.sinaimg.cn/large/005wgNfbly1g9v50zm2moj30ae05ut93.jpg)
+
+
+
+#### Repetition
+
+![image](https://tva2.sinaimg.cn/large/005wgNfbly1g9v565i24jj30a9065jrn.jpg)
+
+
+
+### 2.4.2 From an NFA to a DFA
+
+subset construction
+
+- eliminating $\epsilon$-transition
+  - construction of $\epsilon$-closure
+- eliminate multiple transitions from a state on a single input character
+
+
+
+#### The Subset Construction
+
+- We first compute the $\epsilon-closure$ of the start state of M;
+- For this set, and for each subsequent set, we compute transitions on characters a as follows;
+- Given a set $S$ of states and a character $a$ in the alphabet, compute the set $S'_a = \{t | for\ some\ s\ in\ S\ there\ is\ a\ transition\ from\ s\ to\ t\ on\ a \}$ ;
+- Compute $\overline{S'_a}$ the $\epsilon-closure$ of $S'_a$. This defines a new state in the subset construction, together with a new transition $S\stackrel{a}{\longrightarrow}\overline{S'_a}$ ;
+- Continue with this process until no new states or transitions are created;
+- Mark as accepting those states constructed in this manner that contain an accepting state of M;
