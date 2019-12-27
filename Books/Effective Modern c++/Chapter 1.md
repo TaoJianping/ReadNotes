@@ -42,6 +42,7 @@ T is deduced to be **int**, but ParamType is deduced to be **const int&**.
 
 The simplest situation is when ParamType is a reference type or a pointer type, but
 not a universal reference. In that case, type deduction works like this:
+
 1. If expr’s type is a reference, ignore the reference part.
 2. Then pattern-match expr’s type against ParamType to determine T.
 
@@ -56,9 +57,9 @@ For example, if this is our template,
 template<typename T>
 void f(T& param); // ParamType is `T&`
 
-int x = 27; // x is an int
-const int cx = x; // cx is a const int
-const int& rx = x; // rx is a reference to x as a const int
+int x = 27; 			// x is an int
+const int cx = x; 		// cx is a const int
+const int& rx = x; 		// rx is a reference to x as a const int
 
 f(x); // T is int, param's type is int&
 f(cx); // T is const int, param's type(expr) is const int&
@@ -204,8 +205,37 @@ void f(ParamType param);
 f(expr); // call f with some expression
 ```
 
-When a variable is declared using auto, auto plays the role of T in the template, and
-the type specifier for the variable acts as ParamType.
+而在auto类型推导里面，auto就是上面的T，而`type specifier`就是上面的ParamType。
+
+对于auto type deduction来说，规则和item1 的template type deduction一样，分成三个情况：
+
+-  Case 1: The type specifier is a pointer or reference, but not a universal reference.
+- Case 2: The type specifier is a universal reference.
+- Case 3: The type specifier is neither a pointer nor a reference.
+
+```c++
+auto x = 27; 			// case 3 (x is neither ptr nor reference)
+const auto cx = x; 		// case 3 (cx isn't either)
+const auto& rx = x; 	// case 1 (rx is a non-universal ref.)
+
+auto&& uref1 = x; 		// x is int and lvalue,
+						// so uref1's type is int&
+auto&& uref2 = cx; 		// cx is const int and lvalue,
+						// so uref2's type is const int&
+auto&& uref3 = 27; 		// 27 is int and rvalue,
+						// so uref3's type is int&&
+
+const char name[] = "R. N. Briggs";	
+auto arr1 = name; 			// arr1's type is const char*
+auto& arr2 = name; 			// arr2's type is const char (&)[13]
+
+void someFunc(int, double); // someFunc is a function;
+							// type is void(int, double)
+auto func1 = someFunc; 		// func1's type is
+							// void (*)(int, double)
+auto& func2 = someFunc; 	// func2's type is
+							// void (&)(int, double)
+```
 
 
 
@@ -221,3 +251,53 @@ Things to Remember
 
 ## Item 3:Understand decltype 
 
+TODO 没咋看懂
+
+
+
+## Item 4：Know how to view deduced types.
+
+就是教我们怎么看自动推导出的类型。
+
+
+
+### IDE Editors
+
+把鼠标移上去自动提示
+
+
+
+### compiler Diagnostics
+
+编译时的报错信息，太鬼畜了
+
+
+
+### Runtime Output
+
+```c++
+cout << "T = " << typeid(T).name() << '\n';
+cout << "param = " << typeid(param).name() << '\n';
+```
+
+事实上这个不但有时候是不准确的，连格式都不一致，书里给了个另外的解决办法，就是用boost的`boost::typeindex::type_id_with_cvr`
+
+```c++
+// show T
+cout << "T = "
+<< type_id_with_cvr<T>().pretty_name()
+<< '\n';
+// show param's type
+cout << "param = "
+<< type_id_with_cvr<decltype(param)>().pretty_name()
+<< '\n';
+```
+
+
+
+Things to Remember
+
+- Deduced types can often be seen using IDE editors, compiler error messages,
+  and the Boost TypeIndex library.
+- The results of some tools may be neither helpful nor accurate, so an under‐
+  standing of C++’s type deduction rules remains essential.
