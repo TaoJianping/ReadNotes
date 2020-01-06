@@ -112,3 +112,136 @@ f(NULL); 		// might not compile, but typically calls
 
 
 TODO Mutex不懂
+
+
+
+## Item 9:Prefer alias declarations to typedef s.
+
+这个主要讲的是类型别名，有时候可能你想定义的类型名很长，比如
+
+```c++
+std::unique_ptr<std::unordered_map<std::string, std::string>>
+```
+
+这个时候就需要类型别名定义了。有两种方法：
+
+- `typedef`
+
+  ```c++
+  typedef std::unique_ptr<std::unordered_map<std::string, std::string>> UPtrMapSS;
+  ```
+
+- `alias declarations`
+
+  ```c++
+  using UPtrMapSS = std::unique_ptr<std::unordered_map<std::string, std::string>>;
+  ```
+
+
+
+所以问题就是为什么`alias declarations`要比`typedef`好？
+
+答案是模板，对`alias declarations`来说它可以很方便的用在模板里面：
+
+```c++
+template<typename T> 							// MyAllocList<T>
+using MyAllocList = std::list<T, MyAlloc<T>>; 	// is synonym for
+												// std::list<T,MyAlloc<T>>
+MyAllocList<Widget> lw; 						// client code
+```
+
+可以看到他办一个模板类型用很方便的方法表示出来了，但是typedef不能这样做。这个语法不支持，你必须用很trick的方式写出来：
+
+```c++
+template<typename T> 						// MyAllocList<T>::type
+struct MyAllocList { 						// is synonym for
+	typedef std::list<T, MyAlloc<T>> type; 	// std::list<T,
+}; 											// MyAlloc<T>>
+MyAllocList<Widget>::type lw; 				// client code
+
+template<typename T>
+class Widget { 								// Widget<T> contains
+    private: 								// a MyAllocList<T>
+    typename MyAllocList<T>::type list; 	// as a data member
+    …
+};
+```
+
+注意，当你在另一个模板类里面如此使用我们定义的类，你必须用`typename`关键字把他定义，不然可能会由问题的，编译器无法知道这个到底是不是个类。这就牵涉到`typename`关键字存在的原因了，下面由两个链接，讲的很清楚：
+
+> http://feihu.me/blog/2014/the-origin-and-usage-of-typename/
+>
+> https://stackoverflow.com/questions/610245/where-and-why-do-i-have-to-put-the-template-and-typename-keywords
+
+所以这个就有点多余了，还不如直接用`alias declarations`：
+
+```c++
+template<typename T>
+using MyAllocList = std::list<T, MyAlloc<T>>; 	// as before
+template<typename T>
+class Widget {
+    private:
+    MyAllocList<T> list; 						// no "typename",
+    … 											// no "::type"
+};
+```
+
+这就很自然了。	
+
+同时看一个标准库的应用。这里牵涉到一个`type_traits`，简单来说，他给你个类型，它能帮你去掉某些属性，看代码：
+
+```c++
+// remove_const example
+#include <iostream>
+#include <type_traits>
+
+int main() {
+      typedef const char cc;
+      std::remove_const<cc>::type a;             // char a
+      std::remove_const<const char*>::type b;    // const char* b
+      std::remove_const<char* const>::type c;    // char* c
+
+      a = 'x';
+      b = "remove_const";
+      c = new char[10];
+
+      std::cout << b << std::endl;
+
+      return 0;
+}
+```
+
+```c++
+std::remove_const<T>::type 				// yields T from const T
+std::remove_reference<T>::type 			// yields T from T& and T&&
+std::add_lvalue_reference<T>::type 		// yields T& from T
+```
+
+这里要注意，因为`::type`的原因，所以你还是要在模板类前面加上`typename`关键字。所以，c++又给我们提供了：
+
+```c++
+std::remove_const<T>::type 				// C++11: const T → T
+std::remove_const_t<T> 					// C++14 equivalent
+    
+std::remove_reference<T>::type 			// C++11: T&/T&& → T
+std::remove_reference_t<T> 				// C++14 equivalent
+    
+std::add_lvalue_reference<T>::type 		// C++11: T → T&
+std::add_lvalue_reference_t<T> 			// C++14 equivalent
+```
+
+加了后缀之后，就可以省去`typename`和`::type`了，他的实现就是简单的`alias declarations`：
+
+```c++
+template <class T>
+using remove_const_t = typename remove_const<T>::type;
+
+template <class T>
+using remove_reference_t = typename remove_reference<T>::type;
+
+template <class T>
+using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
+```
+
+
+
