@@ -245,3 +245,221 @@ using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 
 
 
+## Item 10:Prefer scoped enum s to unscoped enum s.
+
+这里介绍`enum class`和`enum`的区别。
+
+```c++
+enum class Color { black, white, red };		// enum class
+	
+enum Color { black, white, red };			// enum
+```
+
+
+
+### 优势一：reduction in namespace pollution
+
+当你使用enum的时候，里面定义的变量会leak出来，污染命名空间，所以：
+
+```c++
+enum Color { black, white, red }; 	// black, white, red are
+									// in same scope as Color
+auto white = false; 				// error! white already
+									// declared in this scope
+```
+
+你可以等价的把`enum Color { black, white, red };`看成一个宏展开，即：
+
+```c++
+enum Color { black, white, red };
+
+#define black 0
+#define white 1
+#define red 2
+```
+
+所以传动的C语言的`enum`其实就是帮你帮你简写了些宏，但是确实会实实在在的污染你的命名空间。
+
+而在c++11之后的关键字`enum class`就没有这个问题，更加像现在高级语言的`enum`了
+
+```c++
+enum class Color { black, white, red }; 	// black, white, red
+											// are scoped to Color
+auto white = false; 						// fine, no other
+ 											// "white" in scope
+Color c = white; 							// error! no enumerator named
+											// "white" is in this scope
+Color c = Color::white; 					// fine
+auto c = Color::white;					 	// also fine (and in accord
+											// with Item 5's advice)
+```
+
+
+
+### 优势二：much more strongly typed.
+
+`enum`里面的就是int类型，但是在`enum class`里面，你可以指定他的类型, 不然的话默认就是int类型：
+
+```c++
+enum class Status: std::uint32_t; 	// underlying type for
+									// Status is std::uint32_t
+									// (from <cstdint>)
+```
+
+同时，只要设计到隐式转换，编译器就能报错，除非你显示转换：
+
+```c++
+enum class Color { black, white, red }; 	// enum is now scoped
+Color c = Color::red; 						// as before, but with scope qualifier	
+if (c < 14.5) { 							// error! can't compare Color and double
+ 	auto factors = primeFactors(c); 		// error! can't pass Color to
+											// function expecting std::size_t
+}
+```
+
+```c++
+if (static_cast<double>(c) < 14.5) { 						// odd code, but
+															// it's valid
+auto factors = primeFactors(static_cast<std::size_t>(c));	// suspect, but
+ 															// it compiles
+}
+```
+
+
+
+### 优势三：enum class forward declaration
+
+```c++
+enum Color; 		// error!
+enum class Color; 	// fine
+```
+
+
+
+实际上更复杂点，`enum`实际上是编译器决定的，有时候它觉得char类型够了就用这个了。但是提前声明的时候这种就会有问题。
+
+具体看这个
+
+- https://zhuanlan.zhihu.com/p/21722362
+
+
+
+> Things to Remember**
+>
+> - C++98-style enums are now known as unscoped enums.
+> - Enumerators of scoped enums are visible only within the enum. They convert
+>   to other types only with a cast.
+> - Both scoped and unscoped enums support specification of the underlying type.
+>   The default underlying type for scoped enums is int. Unscoped enums have no
+>   default underlying type.
+> -  Scoped enums may always be forward-declared. Unscoped enums may be
+>   forward-declared only if their declaration specifies an underlying type.
+
+
+
+## Item 11:Prefer deleted functions to private undefined ones.
+### Things to Remember
+
+-  Prefer deleted functions to private undefined ones.
+- Any function may be deleted, including non-member functions and template instantiations.
+
+
+
+## Item 12:Declare overriding functions override .
+
+### Things to Remember
+
+-  Declare overriding functions override.
+-  Member function reference qualifiers make it possible to treat lvalue and
+  rvalue objects (*this) differently.
+
+
+
+## Item 13:Prefer const_iterator s to iterator s.
+
+### Things to Remember
+
+- Prefer const_iterators to iterators.
+-  In maximally generic code, prefer non-member versions of begin, end, rbegin, etc., over their member function counterparts.
+
+
+
+## Item 14:Declare functions noexcept if they won’t emit exceptions.
+
+注意`noexcept `也是函数签名的一部分。
+
+
+
+### Things to Remember
+
+- noexcept is part of a function’s interface, and that means that callers may depend on it.
+- noexcept functions are more optimizable than non-noexcept functions.
+- noexcept is particularly valuable for the move operations, swap, memory deallocation functions, and destructors.
+- Most functions are exception-neutral rather than noexcept.
+
+
+
+## Item 15:Use constexpr whenever possible.
+
+`constexpr` 关键词是 C++11 引入的；C++14 中放宽了对 constexpr 函数的语法要求；而 C++17 则复用了该关键字，引入了 constexpr if。
+
+`constexpr` 主要为 C++03 引入了以下变动：
+
+- 拓展了「常量表达式」的概念
+- 提供了「强制要求」表达式在编译时求值（compile-time evaluation）的方法
+- 提供了编译时的 `if` 条件判断
+
+
+
+### 作用
+
+#### 拓展了「常量表达式」的概念
+
+这个主要是强制说明这个变量是编译时计算的：
+
+> constexpr indicates a value that’s not only constant, it’s known during compilation
+
+在一些编译时需要确定长度的地方很有用，比如：
+
+```c++
+int sz; 								// non-constexpr variable
+…
+constexpr auto arraySize1 = sz; 		// error! sz's value not known at compilation
+std::array<int, sz> data1; 				// error! same problem
+
+constexpr auto arraySize2 = 10; 		// fine, 10 is a compile-time constant
+std::array<int, arraySize2> data2; 		// fine, arraySize2 is constexpr
+```
+
+
+
+#### 提供了「强制要求」表达式在编译时求值（compile-time evaluation）的方法
+
+当一个函数被`constexpr`标注的时候，编译器在一些情况下可以做一些优化：
+
+> Such functions produce compile-time constants when they are called with compile-time constants. If they’re called with values not known until runtime, they produce runtime values.
+
+- constexpr functions can be used in contexts that demand compile-time constants. If the values of the arguments you pass to a constexpr function in such a context are known during compilation, the result will be computed during compilation. If any of the arguments’ values is not known during compilation, your code will be rejected.
+- When a constexpr function is called with one or more values that are not known during compilation, it acts like a normal function, computing its result at runtime. This means you don’t need two functions to perform the same operation, one for compile-time constants and one for all other values. The constexpr function does it all.
+
+
+
+### Things to Remember
+
+- constexpr objects are const and are initialized with values known during compilation.
+-  constexpr functions can produce compile-time results when called with arguments whose values are known during compilation.
+- constexpr objects and functions may be used in a wider range of contexts than non-constexpr objects and functions.
+- constexpr is part of an object’s or function’s interface.
+
+
+
+### 参考
+
+- https://www.cnblogs.com/DswCnblog/p/6513310.html
+
+- https://www.jianshu.com/p/34a2a79ea947
+- https://www.zhihu.com/question/274323507
+- https://www.zhihu.com/question/31123574
+- https://www.zhihu.com/question/35614219/answer/63798713
+- https://www.zhihu.com/question/29662350
+- http://cpptruths.blogspot.com/2011/07/want-speed-use-constexpr-meta.html
