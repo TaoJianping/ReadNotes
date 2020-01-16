@@ -463,3 +463,67 @@ std::array<int, arraySize2> data2; 		// fine, arraySize2 is constexpr
 - https://www.zhihu.com/question/35614219/answer/63798713
 - https://www.zhihu.com/question/29662350
 - http://cpptruths.blogspot.com/2011/07/want-speed-use-constexpr-meta.html
+
+
+
+## Item 17:Understand special member function generation.
+在C++用语中，***the special member functions***代表着那些会自动生成的函数。当然，自动生成只会在需要的时候，而不是一开始就自动生成。
+
+> Generated special member functions are implicitly public and inline, and they’re nonvirtual unless the function in question is a destructor in a derived class inheriting from a base class with a virtual destructor. In that case, the compiler-generated destructor for the derived class is also virtual.
+
+在C++11的时候，类在需要的时候会自动生成6个函数，分别是
+
+- the default constructor,
+- the destructor
+- the copy constructor
+- the copy assignment operator
+- the move constructor
+-  the move assignment operator
+
+
+
+#### move operation 特殊的规则
+
+- 两种copy operation是相互独立的，也就是说如果其中的某个你定义了，但是不会影响另一个的自动生成。但是move operation不是，如果你定义了其中的一个move operation，那么它会阻止另一个的自动生成。
+- move operations won’t be generated for any class that explicitly declares a copy operation.
+- Declaring a move operation (construction or assignment) in a class causes compilers to disable the copy operations. (The copy operations are disabled by deleting them).
+- C++11 does not generate move operations for a class with a user-declared destructor.
+
+
+
+#### move operations 的生成规则 
+
+So move operations are generated for classes (when needed) only if these three things
+are true:
+
+- No copy operations are declared in the class.
+- No move operations are declared in the class.
+- No destructor is declared in the class.
+
+
+
+#### The C++11 rules governing the special member functions are thus:
+
+- **Default constructor**: Same rules as C++98. Generated only if the class contains no user-declared constructors.
+- **Destructor**: Essentially same rules as C++98; sole difference is that destructors are noexcept by default. As in C++98, virtual only if a base class destructor is virtual.
+- **Copy constructor**: Same runtime behavior as C++98: memberwise copy construction of non-static data members. Generated only if the class lacks a user-declared copy constructor. Deleted if the class declares a move operation. Generation of this function in  a class with a user-declared copy assignment operator or destructor is deprecated.
+- **Copy assignment operator**: Same runtime behavior as C++98: memberwise copy assignment of non-static data members. Generated only if the class lacks a user-declared copy assignment operator. Deleted if the class declares a move operation. Generation of this function in a class with a user-declared copy constructor or destructor is deprecated.
+- **Move constructor** and **move assignment operator**: Each performs memberwise
+  moving of non-static data members. Generated only if the class contains no user-
+  declared copy operations, move operations, or destructor.
+
+>### Things to Remember
+>
+>- The special member functions are those compilers may generate on their own:
+>  default constructor, destructor, copy operations, and move operations.
+>- Move operations are generated only for classes lacking explicitly declared
+>  move operations, copy operations, and a destructor.
+>- The copy constructor is generated only for classes lacking an explicitly
+>  declared copy constructor, and it’s deleted if a move operation is declared.
+>  The copy assignment operator is generated only for classes lacking an explic‐
+>  itly declared copy assignment operator, and it’s deleted if a move operation is
+>  declared. Generation of the copy operations in classes with an explicitly
+>  declared destructor is deprecated.
+>- Member function templates never suppress generation of special member
+>  functions.
+
