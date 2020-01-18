@@ -273,3 +273,12 @@ FIND_PATH(myHeader NAMES hello.h PATHS /usr/include
 
 
 
+## [ExternalProject](https://cmake.org/cmake/help/latest/module/ExternalProject.html#id1)
+
+### Contents
+
+- [External Project Definition](https://cmake.org/cmake/help/latest/module/ExternalProject.html#external-project-definition)
+- [Obtaining Project Properties](https://cmake.org/cmake/help/latest/module/ExternalProject.html#obtaining-project-properties)
+- [Explicit Step Management](https://cmake.org/cmake/help/latest/module/ExternalProject.html#explicit-step-management)
+- [Examples](https://cmake.org/cmake/help/latest/module/ExternalProject.html#examples)
+

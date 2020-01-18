@@ -62,6 +62,12 @@ https://stackoverflow.com/questions/6457856/whats-the-difference-between-gtest-l
 
 
 
+## 如何解决 find_package(GTest REQUIRED)失败
+
+https://stackoverflow.com/questions/24295876/cmake-cannot-find-googletest-required-library-in-ubuntu
+
+https://blog.csdn.net/chengde6896383/article/details/88888064
+
 
 
 ## CMake 常用变量
